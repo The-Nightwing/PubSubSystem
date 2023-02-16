@@ -2,78 +2,74 @@ import pika
 import json
 
 
-
 class RegistryServer:
-        def __init__(self, port):
-            self.port = port
-            self.serverList = []
-            self.max_servers = 2
-            self.current_count_servers = 0
-            self.register_incoming = ""
-            self.register_outgoing =  ""
-            self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-            self.channel = self.connection.channel()
-            self.channel.exchange_declare(exchange='direct_logs', exchange_type='direct')
+    def __init__(self, port):
+        self.port = port
+        self.serverPortList = []
+        self.max_servers = 10
+        self.current_count_servers = 0
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host='localhost'))
+        self.channel = self.connection.channel()
+        self.channel.exchange_declare(
+            exchange='direct_logs', exchange_type='direct')
+        self.init_consume()
+        self.channel.start_consuming()
 
-            self.channel.queue_declare(queue='unique_id')
-            self.channel.queue_bind(exchange='direct_logs', queue='unique_id', routing_key='unique_id')
-            self.channel.basic_consume(queue='unique_id', on_message_callback=self.createUniqueQueue, auto_ack=True)
+    def init_consume(self):
+        for x in range(0,self.max_servers):
+            self.channel.queue_declare(queue='register_incoming_'+str(x))
+            self.channel.queue_bind(exchange='direct_logs', queue='register_incoming_'+str(x), routing_key='register_incoming_'+str(x))
 
-            # self.channel.queue_declare(queue=self.register_incoming)
-            # self.channel.queue_bind(exchange='direct_logs', queue=self.register_incoming, routing_key=self.register_incoming)
+            self.channel.queue_declare(queue='register_outgoing_'+str(x))
+            self.channel.queue_bind(exchange='direct_logs', queue='register_outgoing_'+str(x), routing_key='register_outgoing_'+str(x))
+            # self.channel.basic_consume(queue='register_incoming_'+str(x), on_message_callback=self.registerServer, auto_ack=True)
 
-            # self.channel.queue_declare(queue=self.register_outgoing)
-            # self.channel.queue_bind(exchange='direct_logs', queue=self.register_outgoing, routing_key=self.register_outgoing)
+        self.channel.queue_declare(queue='unique_id')
+        self.channel.queue_bind(exchange='direct_logs', queue='unique_id', routing_key='unique_id')
 
-            # self.channel.basic_consume(queue=self.register_incoming, on_message_callback=self.registerServer, auto_ack=True)
+        self.channel.queue_declare(queue='unique_id_outgoing')
+        self.channel.queue_bind(exchange='direct_logs', queue='unique_id_outgoing', routing_key='unique_id_outgoing')
 
-            self.channel.queue_declare(queue='getServerList_incoming')
-            self.channel.queue_declare(queue='getServerList_outgoing')
-
-            self.channel.queue_bind(exchange='direct_logs', queue='getServerList_incoming', routing_key='getServerList_incoming')
-            self.channel.queue_bind(exchange='direct_logs', queue='getServerList_outgoing', routing_key='getServerList_outgoing')
-
-            self.channel.basic_consume(queue='getServerList_incoming', on_message_callback=self.getServerList, auto_ack=True)
-            
-            self.channel.start_consuming()            
-
-        def createUniqueQueue(self, ch, method, properties, body):
-            body = json.loads(body)
-            id_ = body['id']
-
-            self.register_incoming = "register_incoming_"+str(id_)
-            self.register_outgoing = "register_outgoing_"+str(id_)
-
-            self.channel.queue_declare(queue=self.register_incoming)
-            self.channel.queue_bind(exchange='direct_logs', queue=self.register_incoming, routing_key=self.register_incoming)
-
-            self.channel.queue_declare(queue=self.register_outgoing)
-            self.channel.queue_bind(exchange='direct_logs', queue=self.register_outgoing, routing_key=self.register_outgoing)
-
-            self.channel.basic_consume(queue=self.register_incoming, on_message_callback=self.registerServer, auto_ack=True)
-
-
-        def registerServer(self, ch, method, properties, body):
-            print("ss")
-            #decode
-            body  = json.loads(body)
-            print(body)
-            if body['request'] == "register":
-                if self.current_count_servers < self.max_servers:
-                    self.current_count_servers += 1
-                    self.serverList.append(body['port'])
-                    print("JOIN REQUEST FROM LOCALHOST:"+str(body['port']))
-                    self.channel.basic_publish(exchange='direct_logs', routing_key=self.register_outgoing, body="SUCCESS")
-                else:
-                    self.channel.basic_publish(exchange='direct_logs', routing_key=self.register_outgoing, body="FAIL")
+        self.channel.queue_declare(queue='getServerList_incoming')
+        self.channel.queue_bind( exchange='direct_logs', queue='getServerList_incoming', routing_key='getServerList_incoming')
         
-        def getServerList(self, ch, method, properties, body):
-            body = json.loads(body)
-            if body['request'] == "getServerList":
-                print("SERVER LIST REQUESTED FROM LOCALHOST:"+str(body['port']))
-                self.channel.basic_publish(exchange='direct_logs', routing_key='getServerList_outgoing', body=json.dumps({'list': self.serverList}))
+        self.channel.queue_declare(queue='getServerList_outgoing')
+        self.channel.queue_bind( exchange='direct_logs', queue='getServerList_outgoing', routing_key='getServerList_outgoing')
         
-            
+        self.channel.queue_declare(queue='error')
+        self.channel.queue_bind( exchange='direct_logs', queue='error', routing_key='error')
+        
+        self.channel.basic_consume(queue='unique_id', on_message_callback=self.registerServer, auto_ack=True)
+        self.channel.basic_consume(queue='getServerList_incoming', on_message_callback=self.getServerList, auto_ack=True)
+
+
+    def registerServer(self, ch, method, properties, body):
+        # decode
+        body = json.loads(body)
+        port=body['port']
+        if body['request'] == "register":
+            if self.current_count_servers < self.max_servers :
+                self.current_count_servers += 1
+                self.serverPortList.append(port)
+                print("JOIN REQUEST FROM LOCALHOST:"+str(port))
+                self.channel.basic_publish(exchange='direct_logs', routing_key='unique_id_outgoing', body=json.dumps({'port': port, 'code':"SUCCESS", 'message': self.current_count_servers -1}))
+            else:
+                self.channel.basic_publish(exchange='direct_logs', routing_key='error', body=json.dumps({'port': port, 'code':"FAIL", 'message':"Registry Server Full"}))
+
+    def getServerList(self, ch, method, properties, body):
+        body = json.loads(body)
+        if body['request'] == "getServerList":
+            print("SERVER LIST REQUESTED FROM LOCALHOST:"+str(body['uuid']))
+            print(self.serverPortList)
+            response={}
+            i=1
+            for x in self.serverPortList:
+                response["ServerName"+str(i)]="localhost:"+str(x)
+                i+=1
+            self.channel.basic_publish(
+                exchange='direct_logs', routing_key='getServerList_outgoing', body=json.dumps({'list': response}))
+
 
 if __name__ == "__main__":
     server = RegistryServer(8800)
