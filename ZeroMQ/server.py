@@ -1,7 +1,7 @@
 import zmq
 import sys
 
-
+from datetime import date
 
 class Server:
     def __init__(self, port, address, name):
@@ -11,6 +11,8 @@ class Server:
         self.name = name
         self.max_clients = 10
         self.clientList = []
+        self.articleList = []
+
         self.res_socket = self.context.socket(zmq.REP)
         self.res_socket.bind("tcp://*:"+str(port))
 
@@ -39,7 +41,39 @@ class Server:
                 else:
                     self.res_socket.send_json({'message': 'FAIL'})
 
-    
+            if message['request']=='publishArticle':
+                if message['uuid'] in self.clientList:
+                    print(" [x] PUBLISH REQUEST FROM %r" % message['uuid'])
+                    message['article']['time'] = str(date.today())
+                    self.articleList.append(message['article'])
+
+                    #if any of the fields is empty, the article is not published
+                    if message['article']['type'] == '' or message['article']['author'] == '' or message['article']['content'] == '':
+                        self.res_socket.send_json({'message': 'FAIL'})
+                    else:
+                        self.res_socket.send_json({'message': 'SUCCESS'})
+                else:
+                    self.res_socket.send_json({'message': 'FAIL'})
+
+            if message['request']=='getArticleList':
+                print('lmao')
+                if message['uuid'] in self.clientList:
+                # if the client request server for all articles of type sports by author jack publish after 1st january 2023, then return those articles only from articleList, the json recieved has time as string, and the time in articleList is datetime object so we need to convert the time in message to datetime object before comparing
+                    if message['article']['type'] != '' and message['article']['author'] != '' and message['article']['time'] != '':
+                        self.res_socket.send_json({'list': [x for x in self.articleList if x['type'] == message['article']['type'] and x['author'] == message['article']['author'] and x['time'] > message['article']['time']]})
+
+                    elif message['article']['type']=='' and message['article']['author'] != '' and message['article']['time'] != '':
+                        #filter on basis of author and time
+                        self.res_socket.send_json({'list': [x for x in self.articleList if x['author'] == message['article']['author'] and x['time'] > message['article']['time']]})
+
+                    elif message['article']['type'] != '' and message['article']['author'] == '' and message['article']['time'] != '':
+                        #filter on basis of author
+                        self.res_socket.send_json({'list': [x for x in self.articleList if x['type'] == message['article']['type'] and x['time'] > message['article']['time']]})
+                    else:
+                        self.res_socket.send_json({'list': []})
+
+                else:
+                    self.res_socket.send_json({'message': 'FAIL'})
 
 
     def register(self):

@@ -14,7 +14,9 @@ class Server:
         self.assignedPort=20
         self.channel = self.connection.channel()
         self.channel.exchange_declare(
-            exchange='direct_logs', exchange_type='direct')
+            exchange='direct_logs', 
+            exchange_type='direct'
+        )
         self.error=False
 
     def start(self):
@@ -115,7 +117,6 @@ class Server:
         pass
 
     def connectClient(self):
-
         pass
 
     def endClient(self):

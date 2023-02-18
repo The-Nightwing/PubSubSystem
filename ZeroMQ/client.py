@@ -14,29 +14,74 @@ class Client:
     def getServerList(self):
         self.socket.send_json({'request': 'getServerList'})
         message = self.socket.recv_json()
-        print(message)
-        return message['message']
+        print("Server List: ")
+        print()
+        for x in message['list']:
+            print("Server Name: " + x[0] + " Port: " + str(x[1]))
+        print()
     
     def joinServer(self, port):
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://localhost:"+str(port))
         socket.send_json({'request': 'register', 'uuid': str(self.id)})
+        message = socket.recv_json()
+        if message['message'] == 'SUCCESS':
+            self.connectedServers.append(port)
+            print('Successfully Joined Server')
 
-    def getArticles(self):
-        pass
+    def getArticles(self, port, type, author, time):
+        socket = self.context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:"+str(port))
+        socket.send_json(
+            {
+                'request': 'getArticleList', 
+                'uuid': str(self.id), 
+                'article': 
+                    {
+                        'type': type, 
+                        'author': author, 
+                        'time': time, 
+                    }
+            }
+        )
+        message = socket.recv_json()
+
+        if message['message'] == 'FAIL':
+            print('Failed to get Articles')
+            return
+        for x in message['list']:
+            print(x)
 
     def leaveServer(self, port):
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://localhost:"+str(port))
         socket.send_json({'request': 'unregister', 'uuid': str(self.id)})
         
-    def publishArticle(self):
-        pass
+    def publishArticle(self, port, type, author, content):
+        socket = self.context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:"+str(port))
+        socket.send_json(
+            {
+                'request': 'publishArticle', 
+                'uuid': str(self.id), 
+                'article': 
+                    {
+                        'type': type, 
+                        'author': author, 
+                        'content': content, 
+                    }
+            }
+        )
+
+        message = socket.recv_json()
+        if message['message'] == 'FAIL':
+            print('Failed to publish Article')
+            return
 
     def printConnectedArticles(self):
         for server in self.connectedServers:
             print(server)
-    
+
     def menu(self):
         while True:
             print('1. Join Server')
@@ -52,16 +97,38 @@ class Client:
             if choice == '1':
                 port=input('Choose Server to Join: ')
                 self.joinServer(port)
+
             elif choice == '2':
-                self.getArticles()
+                port=input('Choose Server to Get Articles From: ')
+                print('Enter Filter: ')
+                type = input('Type: ')
+                author = input('Author: ')
+                time = input('Time (YYYY-MM-DD): ')
+                if port in self.connectedServers:
+                    self.getArticles(port, type, author, time)
+                else:
+                    print('Not connected to this server')
+
             elif choice == '3':
                 port=input('Choose Server to Leave: ')
-                self.leaveServer(port)
+                if port in self.connectedServers:
+                    self.connectedServers.remove(port)
+                    self.leaveServer(port)
+                else:
+                    print('Not connected to this server')
             elif choice == '4':
                 self.getServerList()
                 # self.channel.start_consuming()
             elif choice == '5':
-                self.publishArticle()
+                port=input('Choose Server to publish On: ')
+                type=input('Enter Article Type: ')
+                author=input('Enter Author: ')
+                content=input('Enter Content: ')
+                if port in self.connectedServers:
+                    self.publishArticle(port, type, author, content)
+                else:
+                    print('Not connected to this server')
+        
             elif choice == '6':
                 self.printConnectedServers()
             elif choice == '7':

@@ -26,7 +26,7 @@ class RegistryServer:
                     self.socket.send_json({'message': 'FAIL'})
 
             elif message['request']=='getServerList':
-                self.socket.send_json({'message': self.serverList})
+                self.socket.send_json({'list': self.serverList})
 
             time.sleep(1)
 
