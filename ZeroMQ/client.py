@@ -21,6 +21,9 @@ class Client:
         print()
     
     def joinServer(self, port):
+        if port in self.connectedServers:
+            print('Already connected to this server')
+            return
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://localhost:"+str(port))
         socket.send_json({'request': 'register', 'uuid': str(self.id)})
@@ -28,6 +31,8 @@ class Client:
         if message['message'] == 'SUCCESS':
             self.connectedServers.append(port)
             print('Successfully Joined Server')
+        else:
+            print('FAIL')
 
     def getArticles(self, port, type, author, time):
         socket = self.context.socket(zmq.REQ)
@@ -46,16 +51,24 @@ class Client:
         )
         message = socket.recv_json()
 
-        if message['message'] == 'FAIL':
-            print('Failed to get Articles')
+        if 'message' in message.keys() and message['message'] == 'FAIL':
+            print('FAIL')
             return
+        
         for x in message['list']:
             print(x)
 
     def leaveServer(self, port):
-        socket = self.context.socket(zmq.REQ)
-        socket.connect("tcp://localhost:"+str(port))
-        socket.send_json({'request': 'unregister', 'uuid': str(self.id)})
+        if port in self.connectedServers:
+            socket = self.context.socket(zmq.REQ)
+            socket.connect("tcp://localhost:"+str(port))
+            socket.send_json({'request': 'unregister', 'uuid': str(self.id)})
+            message = socket.recv_json()
+            if message['message'] == 'SUCCESS':
+                self.connectedServers.remove(port)
+            print(message['message'])
+        else:
+            print('FAIL')
         
     def publishArticle(self, port, type, author, content):
         socket = self.context.socket(zmq.REQ)
@@ -74,11 +87,9 @@ class Client:
         )
 
         message = socket.recv_json()
-        if message['message'] == 'FAIL':
-            print('Failed to publish Article')
-            return
+        print(message['message'])
 
-    def printConnectedArticles(self):
+    def printConnectedServers(self):
         for server in self.connectedServers:
             print(server)
 
@@ -112,7 +123,6 @@ class Client:
             elif choice == '3':
                 port=input('Choose Server to Leave: ')
                 if port in self.connectedServers:
-                    self.connectedServers.remove(port)
                     self.leaveServer(port)
                 else:
                     print('Not connected to this server')

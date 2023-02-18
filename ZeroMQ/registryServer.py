@@ -19,6 +19,7 @@ class RegistryServer:
             message = self.socket.recv_json()
             if message['request']=='register':
                 if self.current_connections < self.max_connections:
+                    print(' [x] REGISTER REQUEST FROM %r' % message['port'])
                     self.current_connections += 1
                     self.serverList.append([message['name'], message['port']])
                     self.socket.send_json({'message': 'SUCCESS'})
@@ -26,6 +27,7 @@ class RegistryServer:
                     self.socket.send_json({'message': 'FAIL'})
 
             elif message['request']=='getServerList':
+                print(' [x] GET SERVER LIST REQUEST FROM %r' % message['port'])
                 self.socket.send_json({'list': self.serverList})
 
             time.sleep(1)

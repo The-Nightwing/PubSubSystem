@@ -27,6 +27,7 @@ class Server:
             # Register Client To Server
             if message['request']=='register':
                 if len(self.clientList)<self.max_clients:
+                    print(" [x] REGISTER REQUEST FROM CLIENT %r" % message['uuid'])
                     self.clientList.append(message['uuid'])
                     self.res_socket.send_json({'message': 'SUCCESS'})
                 else:
@@ -34,8 +35,8 @@ class Server:
 
             # Unregister Client From Server
             if message['request']=='unregister':
-                print(" [x] REMOVE REQUEST FROM %r" % message['uuid'])
                 if message['uuid'] in self.clientList:
+                    print(" [x] REMOVE REQUEST FROM %r" % message['uuid'])
                     self.clientList.remove(message['uuid'])
                     self.res_socket.send_json({'message': 'SUCCESS'})
                 else:
@@ -48,7 +49,7 @@ class Server:
                     self.articleList.append(message['article'])
 
                     #if any of the fields is empty, the article is not published
-                    if message['article']['type'] == '' or message['article']['author'] == '' or message['article']['content'] == '':
+                    if message['article']['type'] == '' or message['article']['author'] == '' or message['article']['content'] == '' or len(message['article']['content'])>200:
                         self.res_socket.send_json({'message': 'FAIL'})
                     else:
                         self.res_socket.send_json({'message': 'SUCCESS'})
@@ -56,8 +57,9 @@ class Server:
                     self.res_socket.send_json({'message': 'FAIL'})
 
             if message['request']=='getArticleList':
-                print('lmao')
                 if message['uuid'] in self.clientList:
+                    print(" [x] ARTICLE LIST REQUEST FROM %r" % message['uuid'])
+                    print("Request For", message['article']);
                 # if the client request server for all articles of type sports by author jack publish after 1st january 2023, then return those articles only from articleList, the json recieved has time as string, and the time in articleList is datetime object so we need to convert the time in message to datetime object before comparing
                     if message['article']['type'] != '' and message['article']['author'] != '' and message['article']['time'] != '':
                         self.res_socket.send_json({'list': [x for x in self.articleList if x['type'] == message['article']['type'] and x['author'] == message['article']['author'] and x['time'] > message['article']['time']]})
@@ -69,8 +71,8 @@ class Server:
                     elif message['article']['type'] != '' and message['article']['author'] == '' and message['article']['time'] != '':
                         #filter on basis of author
                         self.res_socket.send_json({'list': [x for x in self.articleList if x['type'] == message['article']['type'] and x['time'] > message['article']['time']]})
-                    else:
-                        self.res_socket.send_json({'list': []})
+                    elif message['article']['type']=='' and message['article']['author']=='' and message['article']['time']!='':
+                        self.res_socket.send_json({'message': 'FAIL'})
 
                 else:
                     self.res_socket.send_json({'message': 'FAIL'})
