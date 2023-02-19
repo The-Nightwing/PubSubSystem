@@ -12,7 +12,7 @@ class Client:
         self.menu()
 
     def getServerList(self):
-        self.socket.send_json({'request': 'getServerList'})
+        self.socket.send_json({'request': 'getServerList', 'uuid': str(self.id)})
         message = self.socket.recv_json()
         print("Server List: ")
         print()

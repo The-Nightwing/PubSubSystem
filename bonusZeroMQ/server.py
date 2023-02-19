@@ -13,6 +13,8 @@ class Server:
         self.clientList = []
         self.articleList = []
 
+        self.connectedServers = []
+        self.connectedServers.append(port)
         self.res_socket = self.context.socket(zmq.REP)
         self.res_socket.bind("tcp://*:"+str(port))
 
@@ -59,7 +61,28 @@ class Server:
                 if message['uuid'] in self.clientList:
                     print(" [x] ARTICLE LIST REQUEST FROM %r" % message['uuid'])
                     print("Request For", message['article']);
+                    articles = []
+                    if len(self.connectedServers)>0:
+                        print('Connected Servers: ', self.connectedServers)
+                        for server in self.connectedServers:
+                            if server not in message['connectedServers']:
+                                articles = []
+                                socket = self.context.socket(zmq.REQ)
+                                print(server)
+                                socket.connect("tcp://localhost"+":"+str(server))
+                                print(server)
+                                socket.send_json({'article': message['article'], 'request': 'getArticleList', 'uuid': message['uuid'], 'connectedServers': self.connectedServers})
+                                message = socket.recv_json()
+                                for art in message['list']:
+                                    print(art)
+                                    articles.append(art)
+                    
+                    for art in articles:
+                        self.articleList.append(art)
+                    
                 # if the client request server for all articles of type sports by author jack publish after 1st january 2023, then return those articles only from articleList, the json recieved has time as string, and the time in articleList is datetime object so we need to convert the time in message to datetime object before comparing
+                    if message['article']['type'] == '' and message['article']['author'] == '' and message['article']['time'] == '':
+                        self.res_socket.send_json({'list': self.articleList})
                     if message['article']['type'] != '' and message['article']['author'] != '' and message['article']['time'] != '':
                         self.res_socket.send_json({'list': [x for x in self.articleList if x['type'] == message['article']['type'] and x['author'] == message['article']['author'] and x['time'] > message['article']['time']]})
 
@@ -78,6 +101,16 @@ class Server:
 
 
     def register(self):
+        print('Do you want to connect to more servers? (y/n)')
+        choice = input()
+        if choice == 'y':
+            print('Enter the port number of the server you want to connect to')
+            port = input("enter port comma separated: ")
+            port = port.split(',')
+            port = [int(x) for x in port]
+            for p in port:
+                self.connectedServers.append(p)
+
         self.req_socket = self.context.socket(zmq.REQ)
         self.req_socket.connect(self.address)
         self.req_socket.send_json({'port': self.port, 'name': self.name, 'request':'register'})
