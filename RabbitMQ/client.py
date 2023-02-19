@@ -7,6 +7,7 @@ class Client:
 
     def __init__(self):
         self.id = uuid.uuid4()
+        self.types= ['sports', 'fashion', 'politics']
         self.connectedServers = {}
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = self.connection.channel()
@@ -99,6 +100,10 @@ class Client:
 
     def PublishArticle(self):
         getType = input('Enter type: ')
+        
+        if getType not in self.types:
+            print('Invalid type: {}, Available types are {}'.format(getType, self.types))
+            return
         getBody = input('Enter body: ')
         getAuthor = input('Enter author: ')
         self.printConnectedServers()
@@ -125,6 +130,10 @@ class Client:
         self.printConnectedServers()
         port = input('Enter server port to Get Articles from: ')
         type = input('Type: ')
+        if type != '' and type not in self.types:
+            print('Invalid type: {}, Available types are {}'.format(type, self.types))
+            return
+
         author = input('Author: ')
         time = input('Time (YYYY-MM-DD): ')
         if port in self.connectedServers.keys():

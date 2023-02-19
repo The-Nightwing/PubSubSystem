@@ -22,6 +22,12 @@ message Article {
     ArticleType type = 1;
     string author = 2;
     int64 time = 3;
+    string content = 4;
+}
+
+message ArticleRequest {
+    string name = 1;
+    Article article = 2;
 }
 
 message Response {
@@ -44,6 +50,6 @@ service RegistryServer {
 service ArticleServer {
     rpc JoinServer(Client) returns (Response) {};
     rpc LeaveServer(Client) returns (Response) {};
-    rpc GetArticles(Article) returns (stream Article) {};
-    rpc PublishArticle(Article) returns (Response) {};
+    rpc GetArticles(ArticleRequest) returns (stream Article) {};
+    rpc PublishArticle(ArticleRequest) returns (Response) {};
 }

@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61\x31.proto\x12\x03rpc\"\'\n\x06Server\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\"\'\n\x06\x43lient\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\"\x85\x01\n\x07\x41rticle\x12&\n\x04type\x18\x01 \x01(\x0e\x32\x18.rpc.Article.ArticleType\x12\x0e\n\x06\x61uthor\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\"4\n\x0b\x41rticleType\x12\n\n\x06SPORTS\x10\x00\x12\x0b\n\x07\x46\x41SHION\x10\x01\x12\x0c\n\x08POLITICS\x10\x02\"T\n\x08Response\x12$\n\x06status\x18\x01 \x01(\x0e\x32\x14.rpc.Response.Status\"\"\n\x06Status\x12\x0b\n\x07SUCCESS\x10\x00\x12\x0b\n\x07\x46\x41ILURE\x10\x01\"\t\n\x07Request2j\n\x0eRegistryServer\x12(\n\x08Register\x12\x0b.rpc.Server\x1a\r.rpc.Response\"\x00\x12.\n\rGetServerList\x12\x0c.rpc.Request\x1a\x0b.rpc.Server\"\x00\x30\x01\x32\xc8\x01\n\rArticleServer\x12*\n\nJoinServer\x12\x0b.rpc.Client\x1a\r.rpc.Response\"\x00\x12+\n\x0bLeaveServer\x12\x0b.rpc.Client\x1a\r.rpc.Response\"\x00\x12-\n\x0bGetArticles\x12\x0c.rpc.Article\x1a\x0c.rpc.Article\"\x00\x30\x01\x12/\n\x0ePublishArticle\x12\x0c.rpc.Article\x1a\r.rpc.Response\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61\x31.proto\x12\x03rpc\"\'\n\x06Server\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\"\'\n\x06\x43lient\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\"\x96\x01\n\x07\x41rticle\x12&\n\x04type\x18\x01 \x01(\x0e\x32\x18.rpc.Article.ArticleType\x12\x0e\n\x06\x61uthor\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x04 \x01(\t\"4\n\x0b\x41rticleType\x12\n\n\x06SPORTS\x10\x00\x12\x0b\n\x07\x46\x41SHION\x10\x01\x12\x0c\n\x08POLITICS\x10\x02\"=\n\x0e\x41rticleRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1d\n\x07\x61rticle\x18\x02 \x01(\x0b\x32\x0c.rpc.Article\"T\n\x08Response\x12$\n\x06status\x18\x01 \x01(\x0e\x32\x14.rpc.Response.Status\"\"\n\x06Status\x12\x0b\n\x07SUCCESS\x10\x00\x12\x0b\n\x07\x46\x41ILURE\x10\x01\"\t\n\x07Request2j\n\x0eRegistryServer\x12(\n\x08Register\x12\x0b.rpc.Server\x1a\r.rpc.Response\"\x00\x12.\n\rGetServerList\x12\x0c.rpc.Request\x1a\x0b.rpc.Server\"\x00\x30\x01\x32\xd6\x01\n\rArticleServer\x12*\n\nJoinServer\x12\x0b.rpc.Client\x1a\r.rpc.Response\"\x00\x12+\n\x0bLeaveServer\x12\x0b.rpc.Client\x1a\r.rpc.Response\"\x00\x12\x34\n\x0bGetArticles\x12\x13.rpc.ArticleRequest\x1a\x0c.rpc.Article\"\x00\x30\x01\x12\x36\n\x0ePublishArticle\x12\x13.rpc.ArticleRequest\x1a\r.rpc.Response\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'a1_pb2', globals())
@@ -25,17 +25,19 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _CLIENT._serialized_start=58
   _CLIENT._serialized_end=97
   _ARTICLE._serialized_start=100
-  _ARTICLE._serialized_end=233
-  _ARTICLE_ARTICLETYPE._serialized_start=181
-  _ARTICLE_ARTICLETYPE._serialized_end=233
-  _RESPONSE._serialized_start=235
-  _RESPONSE._serialized_end=319
-  _RESPONSE_STATUS._serialized_start=285
-  _RESPONSE_STATUS._serialized_end=319
-  _REQUEST._serialized_start=321
-  _REQUEST._serialized_end=330
-  _REGISTRYSERVER._serialized_start=332
-  _REGISTRYSERVER._serialized_end=438
-  _ARTICLESERVER._serialized_start=441
-  _ARTICLESERVER._serialized_end=641
+  _ARTICLE._serialized_end=250
+  _ARTICLE_ARTICLETYPE._serialized_start=198
+  _ARTICLE_ARTICLETYPE._serialized_end=250
+  _ARTICLEREQUEST._serialized_start=252
+  _ARTICLEREQUEST._serialized_end=313
+  _RESPONSE._serialized_start=315
+  _RESPONSE._serialized_end=399
+  _RESPONSE_STATUS._serialized_start=365
+  _RESPONSE_STATUS._serialized_end=399
+  _REQUEST._serialized_start=401
+  _REQUEST._serialized_end=410
+  _REGISTRYSERVER._serialized_start=412
+  _REGISTRYSERVER._serialized_end=518
+  _ARTICLESERVER._serialized_start=521
+  _ARTICLESERVER._serialized_end=735
 # @@protoc_insertion_point(module_scope)
