@@ -44,19 +44,28 @@ def eventLoop():
         elif choice == '2':
             name=input('Choose Server to Get Articles From: ')
             print('Enter Filter: ')
-            type = input('Type: ')
+            type = input('Type(default SPORTS): ')
+            if type=='SPORTS':
+                type = a1_pb2.Article.SPORTS
+            elif type=='FASHION':
+                type = a1_pb2.Article.FASHION
+            elif type=='POLITICS':
+                type = a1_pb2.Article.POLITICS
+            elif type=='':
+                type = a1_pb2.Article.SPORTS
+            else:
+                print('wrong type')
+                continue
             author = input('Author: ')
             ti = input('Time (DD/MM/YYYY): ')
-            if type=='':
-                type = None
             if author=='':
                 author = None
             if ti=='':
                 ti = None
             else:
                 ti = int(time.mktime(datetime.datetime.strptime(ti, "%d/%m/%Y").timetuple()))
-            if name in server_list.keys():
-                response = connected_server_list[name].GetArticles(a1_pb2.ArticleRequest(name = client_name, article = a1_pb2.Article(type=type,author=author,time=ti)))
+            if name in connected_server_list.keys():
+                response = connected_server_list[name].GetArticles(a1_pb2.ArticleRequest(name = client_name, article = a1_pb2.Article(type=type,author=author,time=ti, content='cccccc')))
                 for r in response:
                     print(r)
 
@@ -92,7 +101,6 @@ def eventLoop():
             if name in connected_server_list.keys():
                 response = connected_server_list[name].PublishArticle(a1_pb2.ArticleRequest(name=client_name,article=a1_pb2.Article(type=type,author=author,content=content,time=0)))
                 if response.status == a1_pb2.Response.SUCCESS:
-                    connected_server_list.pop(name)
                     print('SUCCESS')
                 else:
                     print('FAILURE')
