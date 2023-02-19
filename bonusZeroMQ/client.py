@@ -54,7 +54,7 @@ class Client:
         if 'message' in message.keys() and message['message'] == 'FAIL':
             print('FAIL')
             return
-            
+        
         for x in message['list']:
             print(x)
 
