@@ -32,17 +32,15 @@ class ArticleServer(a1_pb2_grpc.ArticleServerServicer):
     def GetArticles(self, request, context):
         print('ARTICLE REQUEST FROM '+request.name)
         if request.name in self.client_list.keys():
-            print(request.article)
+            # print(request.article.author)
+            # print(request.article.time)
+            # print(request.article.type)
             final_articles = self.article_list.copy()
-            if request.article.author != None:
+            if request.article.author != '':
                 final_articles = filter(lambda art: ArticleServer.filterByAuthor(art, request.article.author), final_articles)
-            if request.article.time != None:
+            if request.article.time != 0:
                 final_articles = filter(lambda art: ArticleServer.filterByDate(art, request.article.time), final_articles)
-            if request.article.type != None:
-                final_articles = filter(lambda art: ArticleServer.filterByType(art, request.article.type), final_articles)
-            x = final_articles
-            for i in x:
-                print(i)
+            final_articles = filter(lambda art: ArticleServer.filterByType(art, request.article.type), final_articles)
             yield from final_articles
             
     
