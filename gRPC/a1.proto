@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+
+package rpc;
+
+message Server {
+    string name = 1;
+    string address = 2;
+}
+
+message Client {
+    string name = 1;
+    string address = 2;
+}
+
+message Article {
+    enum ArticleType {
+        SPORTS = 0;
+        FASHION = 1;
+        POLITICS = 2;
+    }
+    ArticleType type = 1;
+    string author = 2;
+    int64 time = 3;
+}
+
+message Response {
+    enum Status {
+        SUCCESS = 0;
+        FAILURE = 1;
+    }
+    Status status = 1;
+}
+
+message Request{
+
+}
+
+service RegistryServer {
+    rpc Register (Server) returns (Response) {};
+    rpc GetServerList(Request) returns (stream Server) {}; 
+}
+
+service ArticleServer {
+    rpc JoinServer(Client) returns (Response) {};
+    rpc LeaveServer(Client) returns (Response) {};
+    rpc GetArticles(Article) returns (stream Article) {};
+    rpc PublishArticle(Article) returns (Response) {};
+}
