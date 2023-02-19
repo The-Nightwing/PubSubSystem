@@ -14,7 +14,6 @@ class Server:
         self.articleList = []
 
         self.connectedServers = []
-        self.connectedServers.append(port)
         self.res_socket = self.context.socket(zmq.REP)
         self.res_socket.bind("tcp://*:"+str(port))
 
@@ -66,14 +65,11 @@ class Server:
                         print('Connected Servers: ', self.connectedServers)
                         for server in self.connectedServers:
                             if server not in message['connectedServers']:
-                                articles = []
                                 socket = self.context.socket(zmq.REQ)
-                                print(server)
                                 socket.connect("tcp://localhost"+":"+str(server))
-                                print(server)
                                 socket.send_json({'article': message['article'], 'request': 'getArticleList', 'uuid': message['uuid'], 'connectedServers': self.connectedServers})
-                                message = socket.recv_json()
-                                for art in message['list']:
+                                mess = socket.recv_json()
+                                for art in mess['list']:
                                     print(art)
                                     articles.append(art)
                     
