@@ -58,6 +58,10 @@ class Server:
 
             if message['request']=='getArticleList':
                 if message['uuid'] in self.clientList:
+                    #tpye can be only sports , fashion and politics
+                    if message['article']['type'] not in ['sports', 'fashion', 'politics']:
+                        self.res_socket.send_json({'message': 'FAIL'})
+                        return
                     print(" [x] ARTICLE LIST REQUEST FROM %r" % message['uuid'])
                     print("Request For", message['article']);
                 # if the client request server for all articles of type sports by author jack publish after 1st january 2023, then return those articles only from articleList, the json recieved has time as string, and the time in articleList is datetime object so we need to convert the time in message to datetime object before comparing
