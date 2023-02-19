@@ -50,7 +50,10 @@ class RegistryServer:
 
         if body['request'] == "register":
             print("JOIN REQUEST FROM LOCALHOST:"+str(port))
-            if self.current_count_servers < self.max_servers :
+            if self.serverPortList.count(port) > 0:
+                # print("SERVER ALREADY REGISTERED")
+                self.channel.basic_publish(exchange='direct_logs', routing_key='unique_id_outgoing', body=json.dumps({'port': port, 'code':"SUCCESS", 'message':self.serverPortList.index(port)}))
+            elif self.current_count_servers < self.max_servers :
                 self.current_count_servers += 1
                 self.serverPortList.append(port)
                 self.serverNameList.append(name)

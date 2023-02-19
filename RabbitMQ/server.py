@@ -80,8 +80,10 @@ class Server:
         body=json.loads(body)
         if body['request']=='register':
             print(" [x] JOIN REQUEST FROM %r" % body['uuid'])
+            
             if len(self.clientList) < self.max_clients:
-                self.clientList.append(body['uuid'])
+                if self.clientList.count(body['uuid']) == 0:
+                    self.clientList.append(body['uuid'])
                 self.message = {
                     'request': 'register',
                     'port': self.port,
