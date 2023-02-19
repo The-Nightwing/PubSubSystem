@@ -120,12 +120,12 @@ class ArticleServerStub(object):
                 )
         self.GetArticles = channel.unary_stream(
                 '/rpc.ArticleServer/GetArticles',
-                request_serializer=a1__pb2.Article.SerializeToString,
+                request_serializer=a1__pb2.ArticleRequest.SerializeToString,
                 response_deserializer=a1__pb2.Article.FromString,
                 )
         self.PublishArticle = channel.unary_unary(
                 '/rpc.ArticleServer/PublishArticle',
-                request_serializer=a1__pb2.Article.SerializeToString,
+                request_serializer=a1__pb2.ArticleRequest.SerializeToString,
                 response_deserializer=a1__pb2.Response.FromString,
                 )
 
@@ -172,12 +172,12 @@ def add_ArticleServerServicer_to_server(servicer, server):
             ),
             'GetArticles': grpc.unary_stream_rpc_method_handler(
                     servicer.GetArticles,
-                    request_deserializer=a1__pb2.Article.FromString,
+                    request_deserializer=a1__pb2.ArticleRequest.FromString,
                     response_serializer=a1__pb2.Article.SerializeToString,
             ),
             'PublishArticle': grpc.unary_unary_rpc_method_handler(
                     servicer.PublishArticle,
-                    request_deserializer=a1__pb2.Article.FromString,
+                    request_deserializer=a1__pb2.ArticleRequest.FromString,
                     response_serializer=a1__pb2.Response.SerializeToString,
             ),
     }
@@ -236,7 +236,7 @@ class ArticleServer(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/rpc.ArticleServer/GetArticles',
-            a1__pb2.Article.SerializeToString,
+            a1__pb2.ArticleRequest.SerializeToString,
             a1__pb2.Article.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -253,7 +253,7 @@ class ArticleServer(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/rpc.ArticleServer/PublishArticle',
-            a1__pb2.Article.SerializeToString,
+            a1__pb2.ArticleRequest.SerializeToString,
             a1__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
